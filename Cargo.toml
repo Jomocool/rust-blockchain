@@ -2,7 +2,7 @@
 members = [
     # "chain",
     # "contract/erc20",
-    "proc_macros",
+    "proc_macros", "utils",
     # "runtime",
     # "types",
     # "utils",
