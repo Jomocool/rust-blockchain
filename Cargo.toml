@@ -1,8 +1,9 @@
 [workspace]
 members = [
     # "chain",
-    # "contract/erc20",
-    "proc_macros", "utils",
+    "contracts/erc20",
+    "proc_macros",
+    "utils",
     # "runtime",
     # "types",
     # "utils",
