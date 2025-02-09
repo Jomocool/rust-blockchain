@@ -1,0 +1,10 @@
+[workspace]
+members = [
+    # "chain",
+    # "contract/erc20",
+    "proc_macros",
+    # "runtime",
+    # "types",
+    # "utils",
+    # "web3",
+]
