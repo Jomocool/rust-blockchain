@@ -3,9 +3,8 @@ members = [
     # "chain",
     "contracts/erc20",
     "proc_macros",
-    "utils",
     # "runtime",
-    # "types",
-    # "utils",
+    "types",
+    "utils",
     # "web3",
 ]
