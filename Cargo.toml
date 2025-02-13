@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    # "chain",
+    "chain",
     "contracts/erc20",
     "proc_macros",
     "runtime",

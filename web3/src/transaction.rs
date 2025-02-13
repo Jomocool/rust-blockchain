@@ -92,7 +92,6 @@ pub mod tests {
     async fn it_gets_a_transaction_receipt() {
         let tx_hash = send_transaction().await.unwrap();
 
-        // TODO(ddimaria): use polling or callbacks instead of waiting
         sleep(Duration::from_millis(2000)).await;
 
         let response = web3().transaction_receipt(tx_hash).await;
@@ -114,7 +113,6 @@ pub mod tests {
         let (secret_key, _) = keypair();
         let tx_hash = deploy_contract(false).await;
 
-        // TODO(ddimaria): use polling or callbacks instead of waiting
         sleep(Duration::from_millis(1000)).await;
 
         let receipt = web3().transaction_receipt(tx_hash).await.unwrap();

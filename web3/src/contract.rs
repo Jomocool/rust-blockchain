@@ -69,13 +69,11 @@ mod tests {
         let web3 = web3();
         let tx_hash = deploy_contract(true).await;
 
-        // TODO(ddimaria): use polling or callbacks instead of waiting
         sleep(Duration::from_millis(1000)).await;
 
         let receipt = web3.transaction_receipt(tx_hash).await.unwrap();
         let response = web3.code(receipt.contract_address.unwrap(), None).await;
 
-        // ensure the code matches what was deployed
         assert_eq!(response.unwrap(), [0, 1]);
     }
 }

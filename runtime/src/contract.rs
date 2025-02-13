@@ -47,7 +47,7 @@ pub fn call_function(bytes: &[u8], function: &str, params: &[&str]) -> Result<()
         .map_err(|e| RuntimeError::CallFunctionError(e.to_string()))
 }
 
-fn contract_functions(bytes: &[u8]) -> Vec<String> {
+fn _contract_functions(bytes: &[u8]) -> Vec<String> {
     let mut config = Config::new();
     let mut exports = vec![];
 
@@ -108,7 +108,7 @@ mod tests {
     #[test_log::test]
     fn it_retrieves_contract_function_names() {
         let bytes = include_bytes!("./../../target/wasm32-unknown-unknown/release/erc20.wasm");
-        let functions = contract_functions(bytes);
+        let functions = _contract_functions(bytes);
         let expected = [
             "memory",
             "construct",
