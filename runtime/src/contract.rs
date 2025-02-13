@@ -78,13 +78,13 @@ mod tests {
 
     #[test]
     fn it_loads_a_contract() {
-        let bytes = include_bytes!("./../../target/wasm32-unknown-unknown/release/erc20_wit.wasm");
+        let bytes = include_bytes!("./../../target/wasm32-unknown-unknown/release/erc20.wasm");
         let _loaded = load_contract(bytes).unwrap();
     }
 
     #[test]
     fn it_calls_contract_functions() {
-        let bytes = include_bytes!("./../../target/wasm32-unknown-unknown/release/erc20_wit.wasm");
+        let bytes = include_bytes!("./../../target/wasm32-unknown-unknown/release/erc20.wasm");
         let address = Account::random().to_string();
 
         call_function(bytes, "construct", PARAMS_1).unwrap();
@@ -107,7 +107,7 @@ mod tests {
 
     #[test_log::test]
     fn it_retrieves_contract_function_names() {
-        let bytes = include_bytes!("./../../target/wasm32-unknown-unknown/release/erc20_wit.wasm");
+        let bytes = include_bytes!("./../../target/wasm32-unknown-unknown/release/erc20.wasm");
         let functions = contract_functions(bytes);
         let expected = [
             "memory",

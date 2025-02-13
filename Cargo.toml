@@ -6,5 +6,5 @@ members = [
     "runtime",
     "types",
     "utils",
-    # "web3",
+    "web3",
 ]

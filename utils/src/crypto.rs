@@ -1,7 +1,7 @@
 use ethereum_types::{Address, H160, H256, U256};
 use lazy_static::lazy_static;
 use rlp::{Encodable, RlpStream};
-use secp256k1::{
+pub use secp256k1::{
     ecdsa::{RecoverableSignature, RecoveryId, Signature as EcdsaSignature},
     generate_keypair, rand, All, Message, PublicKey, Secp256k1, SecretKey,
 };
