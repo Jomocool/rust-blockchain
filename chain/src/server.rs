@@ -33,6 +33,7 @@ pub(crate) async fn serve(addr: &str, blockchain: Context) -> Result<ServerHandl
     let blockchain_for_transaction_processor = blockchain.clone();
     let mut module = RpcModule::new(blockchain);
 
+    eth_accounts(&mut module)?;
     eth_block_number(&mut module)?;
     eth_get_block_by_number(&mut module)?;
     eth_get_balance(&mut module)?;

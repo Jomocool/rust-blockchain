@@ -9,6 +9,36 @@ use types::{
 
 use crate::{error::Result, server::Context};
 
+/// 在RpcModule中注册一个异步方法"eth_accounts"
+///
+/// 该方法允许用户获取当前区块链上下文中所有账户的
+/// 它通过异步锁来访问区块链数据结构，并提取账户
+///
+/// 参数:
+/// - module: 一个可变引用到RpcModule，用于注册RPC方法
+///
+/// 返回:
+/// - Result<()>: 表示方法注册成功或失败的空结果类型
+pub(crate) fn eth_accounts(module: &mut RpcModule<Context>) -> Result<()> {
+    // 注册一个名为"eth_accounts"的异步RPC方法
+    module.register_async_method("eth_accounts", |_, blockchain| async move {
+        // 异步获取区块链锁，并尝试获取所有账户
+        let accounts = blockchain
+            .lock()
+            .await
+            .accounts
+            .get_all_accounts()
+            // 如果获取账户信息时发生错误，将其转换为JsonRpseeError::Custom
+            .map_err(|e| JsonRpseeError::Custom(e.to_string()))?;
+
+        // 成功获取账户信息后，返回账户
+        Ok(accounts)
+    })?;
+
+    // 函数执行成功，返回Ok(())
+    Ok(())
+}
+
 /// 在RpcModule中注册一个异步方法，用于获取当前区块链的块号。
 ///
 /// # 参数

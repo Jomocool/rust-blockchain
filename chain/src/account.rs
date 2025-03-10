@@ -74,6 +74,18 @@ impl AccountStorage {
         deserialize(account)
     }
 
+    /// 获取所有账户
+    pub(super) fn get_all_accounts(&self) -> Result<Vec<Account>> {
+        let mut accounts = Vec::new();
+        let mut iter = self.trie.iter();
+
+        while let Some((key, _)) = iter.next() {
+            accounts.push(Account::from_slice(&key));
+        }
+
+        Ok(accounts)
+    }
+
     /// 增加一个账户的余额
     pub(crate) fn add_account_balance(&mut self, key: &Account, amount: U256) -> Result<()> {
         let mut account_data = self.get_account(key)?;
