@@ -87,10 +87,8 @@ impl BlockChain {
 
         transaction.nonce = Some(nonce);
 
-        // regenerate the transaction hash with the nonce in place
         let transaction_hash = transaction.hash()?;
 
-        // add to the transaction mempool
         self.transactions.lock().await.send_transaction(transaction);
 
         Ok(transaction_hash)
@@ -109,9 +107,6 @@ impl BlockChain {
     }
 
     pub(crate) async fn process_transactions(&mut self) -> Result<()> {
-        // Bulk drain the current queue to fit into the new block
-        // This is not safe as we lose transactions if a panic occurs
-        // or if the program is halted
         let transactions = self
             .transactions
             .lock()
@@ -134,7 +129,6 @@ impl BlockChain {
                     }
                     Err(error) => {
                         match error {
-                            // The nonce is too high, add back to the mempool
                             ChainError::NonceTooHigh(_, _) => {
                                 tracing::warn!(
                                     "Could not process transaction {:?}: {}",
@@ -157,7 +151,6 @@ impl BlockChain {
                 }
             }
 
-            // update world state
             let state_trie = self.accounts.root_hash()?;
             self.world_state.update_state_trie(state_trie);
 
@@ -172,7 +165,6 @@ impl BlockChain {
                 num_processed
             );
 
-            // now add the block number and hash to the receipts
             for mut receipt in receipts.into_iter() {
                 receipt.block_number = Some(BlockNumber(block.number));
                 receipt.block_hash = block.hash;
@@ -204,11 +196,9 @@ impl BlockChain {
         let mut contract_address: Option<Account> = None;
         let transaction_hash = transaction.transaction_hash()?;
 
-        // ignore transactions without a nonce
         if let Some(nonce) = transaction.nonce {
             tracing::info!("Processing Transaction {:?}", transaction_hash);
 
-            // create the `to` account if it doesn't exist
             if let Some(to) = transaction.to {
                 self.accounts.add_empty_account(&to)?;
             }
@@ -231,13 +221,11 @@ impl BlockChain {
                         .ok_or_else(|| ChainError::NotAContractAccount(to.to_string()))?;
                     let (function, params): (&str, Vec<&str>) = bincode::deserialize(&data)?;
 
-                    // call the function in the contract
                     runtime::contract::call_function(&code, function, &params)
                         .map_err(|e| ChainError::RuntimeError(to.to_string(), e.to_string()))
                 }
             }?;
 
-            // update the nonce
             self.accounts.update_nonce(&transaction.from, nonce)?;
 
             let transaction_receipt = TransactionReceipt {

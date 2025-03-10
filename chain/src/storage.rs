@@ -13,7 +13,6 @@ pub(crate) struct Storage {
     db: rocksdb::DB,
 }
 
-/// Implement a patricia merkle trie interface to work directly with RocksDB
 impl EthDB for Storage {
     type Error = ChainError;
 
@@ -34,12 +33,10 @@ impl EthDB for Storage {
         Ok(())
     }
 
-    // noop
     fn remove(&self, _key: &[u8]) -> Result<()> {
         Ok(())
     }
 
-    // noop
     fn flush(&self) -> Result<()> {
         Ok(())
     }

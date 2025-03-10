@@ -18,7 +18,6 @@ pub enum RuntimeError {
     WasmtimeError(String),
 }
 
-/// Utility result type to be used throughout
 pub type Result<T> = std::result::Result<T, RuntimeError>;
 
 impl From<anyhow::Error> for RuntimeError {

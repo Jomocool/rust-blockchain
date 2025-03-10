@@ -1,6 +1,3 @@
-//! # Transactions
-//!
-//! Interact with Ethereum transactions.
 use crate::error::Result;
 use crate::Web3;
 use ethereum_types::H256;
@@ -10,7 +7,6 @@ use types::bytes::Bytes;
 use types::transaction::{TransactionReceipt, TransactionRequest};
 
 impl Web3 {
-    /// Create a new message call transaction or deploy a contract.
     pub async fn send(&self, transaction_request: TransactionRequest) -> Result<H256> {
         let transaction_request = to_value(&transaction_request)?;
         let params = rpc_params![transaction_request];
@@ -20,7 +16,6 @@ impl Web3 {
         Ok(tx_hash)
     }
 
-    /// Send a raw transaction
     pub async fn send_raw(&self, transaction_request: Bytes) -> Result<H256> {
         let transaction_request = to_value(&transaction_request)?;
         let params = rpc_params![transaction_request];
@@ -30,7 +25,6 @@ impl Web3 {
         Ok(tx_hash)
     }
 
-    /// Retrieve a transaction receipt by transaction hash.
     pub async fn transaction_receipt(&self, tx_hash: H256) -> Result<TransactionReceipt> {
         let tx_hash = to_value(tx_hash)?;
         let params = rpc_params![tx_hash];

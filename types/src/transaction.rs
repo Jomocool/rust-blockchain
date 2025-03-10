@@ -1,8 +1,3 @@
-//! # Transactions
-//!
-//! Accounts send transactions to the blockchain.
-//! Within the blockchain, transactions are cryptographically signed.
-//! Transactions live within blocks.
 use std::sync::Arc;
 
 use crate::account::Account;
@@ -33,9 +28,9 @@ pub struct Transaction {
 }
 
 pub enum TransactionKind {
-    Regular(Address, Address, U256), // a transaction from one account to another.
-    ContractDeployment(Address, Bytes), // a transaction without a 'to' address, where the data field is used for the contract code.
-    ContractExecution(Address, Address, Bytes), // a transaction that interacts with a deployed smart contract. In this case, 'to' address is the smart contract address.
+    Regular(Address, Address, U256),
+    ContractDeployment(Address, Bytes),
+    ContractExecution(Address, Address, Bytes),
 }
 
 impl Transaction {

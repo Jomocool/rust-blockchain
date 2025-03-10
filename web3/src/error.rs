@@ -18,10 +18,8 @@ pub enum Web3Error {
     TransactionSigningError(String),
 }
 
-/// Utility result type to be used throughout
 pub type Result<T> = std::result::Result<T, Web3Error>;
 
-/// Generically convert serde errors to Web3Error::JsonParseError
 impl From<serde_json::Error> for Web3Error {
     fn from(error: serde_json::Error) -> Self {
         Web3Error::JsonParseError(error.to_string())

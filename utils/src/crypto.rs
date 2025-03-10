@@ -10,16 +10,9 @@ use sha3::{Digest, Keccak256};
 use crate::error::{Result, UtilsError};
 
 lazy_static! {
-    pub(crate) static ref CONTEXT: Secp256k1<All> = Secp256k1::new(); // 用于加密操作，生成和验证数字签名
+    pub(crate) static ref CONTEXT: Secp256k1<All> = Secp256k1::new();
 }
 
-/// A struct representing a digital signature.
-///
-/// # Fields
-///
-/// * `v` - The recovery id, used to recover the public key from the signature.
-/// * `r` - The first part of the signature, represented as a 256-bit hash.
-/// * `s` - The second part of the signature, represented as a 256-bit hash.
 pub struct Signature {
     pub v: u64,
     pub r: H256,
@@ -82,53 +75,44 @@ impl TryInto<Vec<u8>> for Signature {
     }
 }
 
-/// Generate a private/public key pair
 pub fn keypair() -> (SecretKey, PublicKey) {
     generate_keypair(&mut rand::thread_rng())
 }
 
-/// Create a hash
 pub fn hash(bytes: &[u8]) -> [u8; 32] {
     Keccak256::digest(bytes).into()
 }
 
-/// Convert a public key into an address using the latest 20 bytes of the hash
 pub fn to_address(item: &[u8]) -> H160 {
     let hash = hash(&item[1..]);
     Address::from_slice(&hash[12..])
 }
 
-/// Convert a public key into an address using the last 20 bytes of the hash
 pub fn public_key_address(key: &PublicKey) -> H160 {
     to_address(&key.serialize_uncompressed())
 }
 
-/// Convert a private key into an address using the last 20 bytes of the hash
 pub fn private_key_address(key: &SecretKey) -> H160 {
     let public_key = key.public_key(&CONTEXT);
 
     public_key_address(&public_key)
 }
 
-// Helper function to hash bytes and convert to a Message
 pub fn hash_message(message: &[u8]) -> Result<Message> {
     let hashed = hash(message);
     Message::from_slice(&hashed).map_err(|e| UtilsError::CreateMessage(e.to_string()))
 }
 
-/// Sign a message with a private key
 pub fn sign(message: &[u8], key: &SecretKey) -> Result<EcdsaSignature> {
     let message = hash_message(message)?;
     Ok(CONTEXT.sign_ecdsa(&message, key))
 }
 
-/// Sign a recoverable message with a private key
 pub fn sign_recovery(message: &[u8], key: &SecretKey) -> Result<RecoverableSignature> {
     let message = hash_message(message)?;
     Ok(CONTEXT.sign_ecdsa_recoverable(&message, key))
 }
 
-/// Verify that a message was signed using a public key
 pub fn verify(message: &[u8], signature: &[u8], key: &PublicKey) -> Result<bool> {
     let message = hash_message(message)?;
     let signature = EcdsaSignature::from_compact(signature)
@@ -137,7 +121,6 @@ pub fn verify(message: &[u8], signature: &[u8], key: &PublicKey) -> Result<bool>
     Ok(CONTEXT.verify_ecdsa(&message, &signature, key).is_ok())
 }
 
-/// Recover a public key using a recoverable signature and signed message
 pub fn recover_public_key(message: &[u8], signature: &[u8], recovery_id: i32) -> Result<PublicKey> {
     let message = hash_message(message)?;
     let recovery_id = RecoveryId::from_i32(recovery_id)
@@ -150,13 +133,11 @@ pub fn recover_public_key(message: &[u8], signature: &[u8], recovery_id: i32) ->
         .map_err(|e| UtilsError::RecoverError(e.to_string()))
 }
 
-/// Recover the address of the public key using a recoverable signature and signed message
 pub fn recover_address(message: &[u8], signature: &[u8], recovery_id: i32) -> Result<Address> {
     let public_key = recover_public_key(message, signature, recovery_id)?;
     Ok(public_key_address(&public_key))
 }
 
-/// Encode items in a RlpStream
 pub fn rlp_encode<T: Encodable>(items: Vec<T>, signature: Option<&Signature>) -> RlpStream {
     let mut stream = RlpStream::new();
     let mut list_size = items.len();

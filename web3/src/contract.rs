@@ -1,6 +1,3 @@
-//! # Contracts
-//!
-//! Deploy and interact with contracts on Ethereum.
 
 use crate::error::Result;
 use crate::Web3;
@@ -13,7 +10,6 @@ use types::helpers::to_hex;
 use types::transaction::TransactionRequest;
 
 impl Web3 {
-    /// Deploy a contract to the chain.
     pub async fn deploy<'a>(
         &self,
         owner: Address,
@@ -38,7 +34,6 @@ impl Web3 {
         self.send(transaction_request).await
     }
 
-    /// Get the contract code for an address
     pub async fn code(
         &self,
         address: Address,

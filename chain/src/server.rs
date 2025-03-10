@@ -1,7 +1,3 @@
-//! # Server
-//!
-//! Start the JsonRPC server and register methods
-
 use jsonrpsee::{
     server::{ServerBuilder, ServerHandle},
     RpcModule,
@@ -20,7 +16,6 @@ use crate::{
 
 pub(crate) type Context = Arc<Mutex<BlockChain>>;
 
-// jsonrpsee requires static lifetimes for state
 pub(crate) async fn serve(addr: &str, blockchain: Context) -> Result<ServerHandle> {
     if env::var("RUST_LOG").is_err() {
         env::set_var("RUST_LOG", "info")
@@ -28,7 +23,6 @@ pub(crate) async fn serve(addr: &str, blockchain: Context) -> Result<ServerHandl
 
     FmtSubscriber::builder().finish().try_init()?;
 
-    // generate keys if necessary
     add_keys()?;
 
     let addrs = addr.parse::<SocketAddr>()?;
@@ -39,7 +33,6 @@ pub(crate) async fn serve(addr: &str, blockchain: Context) -> Result<ServerHandl
     let blockchain_for_transaction_processor = blockchain.clone();
     let mut module = RpcModule::new(blockchain);
 
-    // register methods
     eth_block_number(&mut module)?;
     eth_get_block_by_number(&mut module)?;
     eth_get_balance(&mut module)?;
@@ -58,7 +51,6 @@ pub(crate) async fn serve(addr: &str, blockchain: Context) -> Result<ServerHandl
         *ADDRESS
     );
 
-    // process transactions in a separate thread
     let transaction_processor = task::spawn(async move {
         let mut interval = time::interval(Duration::from_millis(1000));
 

@@ -9,7 +9,6 @@ use types::transaction::{SignedTransaction, Transaction};
 use utils::crypto::SecretKey;
 
 impl Web3 {
-    /// Retrieve the eth balance for an accout at a given block.
     pub async fn get_balance_by_block(
         &self,
         address: Account,
@@ -40,7 +39,6 @@ impl Web3 {
         Ok(signed_transaction)
     }
 
-    /// Retrieve the eth balance for an accout at a given block.
     pub async fn get_transaction_count(&self, address: Account) -> Result<U256> {
         let params = rpc_params![to_hex(address)];
         let response = self.send_rpc("eth_getTransactionCount", params).await?;
@@ -64,7 +62,6 @@ mod tests {
 
     #[tokio::test]
     async fn it_gets_a_balance_by_block() {
-        // crate::transaction::tests::send_transaction().await.unwrap();
         let account = *ACCOUNT_1;
         let response = web3()
             .get_balance_by_block(account, Some(BlockNumber(0.into())))

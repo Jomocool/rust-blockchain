@@ -1,7 +1,3 @@
-//! # Json RPC Methods
-//!
-//! Start the JsonRPC server and register methods
-//! 
 use ethereum_types::H256;
 use jsonrpsee::core::Error;
 use jsonrpsee::core::Error as JsonRpseeError;

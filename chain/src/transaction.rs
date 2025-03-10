@@ -19,12 +19,10 @@ impl TransactionStorage {
         }
     }
 
-    // add to the transaction mempool
     pub(crate) fn send_transaction(&mut self, transaction: Transaction) {
         self.mempool.push_back(transaction);
     }
 
-    // get the receipt of the transaction
     pub(crate) fn get_transaction_receipt(&self, hash: &H256) -> Result<TransactionReceipt> {
         let transaction_receipt = self
             .receipts

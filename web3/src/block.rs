@@ -6,9 +6,6 @@ use types::block::{Block, BlockNumber};
 use types::helpers::to_hex;
 
 impl Web3 {
-    /// Utility function for unwrapping an optional BlockNumber.
-    /// If the Option is Some, convert it to a hex string.
-    /// If the Option is None, use "latest".
     pub(crate) fn get_hex_blocknumber(block_number: Option<BlockNumber>) -> String {
         block_number.map_or_else(
             || "latest".to_string(),
@@ -16,7 +13,6 @@ impl Web3 {
         )
     }
 
-    /// Retrieve the block number of the current block.
     pub async fn get_block_number(&self) -> Result<BlockNumber> {
         let response = self.send_rpc("eth_blockNumber", rpc_params![]).await?;
         let block_number: BlockNumber = serde_json::from_value(response)?;
@@ -24,7 +20,6 @@ impl Web3 {
         Ok(block_number)
     }
 
-    /// Retrieve the block information using the block number.
     pub async fn get_block(&self, block_number: U64) -> Result<Block> {
         let block_number = to_hex(block_number);
         let params = rpc_params![block_number];

@@ -18,7 +18,6 @@ pub(crate) fn deserialize<V: DeserializeOwned>(value: &[u8]) -> Result<V> {
     Ok(deserialized)
 }
 
-// #[cfg(test)]
 #[allow(unused)]
 pub mod tests {
 

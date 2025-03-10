@@ -1,9 +1,3 @@
-// ! # Errors
-// !
-// ! Custom Errors for the whole library.
-
-/////////////////////////////////////////////////////////////////////////////////
-
 use thiserror::Error;
 
 #[derive(Error, Debug)]

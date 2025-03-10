@@ -1,9 +1,3 @@
-//! # Blocks
-//!
-//! Blocks are a fundamental aspect of the Ethereum blockchain.
-//! A block can consist of many transactions.
-//! Each block contains a hash of the parent block, which links blocks together.
-
 use std::ops::Deref;
 
 use ethereum_types::{H256, U64};

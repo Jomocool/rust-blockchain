@@ -1,13 +1,6 @@
-//! # Accounts
-//!
-//! In Ethereum, Accounts are just addresses.
-//! Accounts can have ETH and tokens, and can send transactions to the chain.
-//! A deployed contract is also an account.
-//! Accounts can also interact with deployed contracts.
-
+use crate::bytes::Bytes;
 use ethereum_types::{Address, U256};
 use serde::{Deserialize, Serialize};
-use crate::bytes::Bytes;
 pub type Account = Address;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]

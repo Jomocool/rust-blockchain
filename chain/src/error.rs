@@ -89,7 +89,6 @@ pub enum ChainError {
     TypeError(String),
 }
 
-/// Utility result type to be used throughout
 pub type Result<T> = std::result::Result<T, ChainError>;
 
 impl From<AddrParseError> for ChainError {

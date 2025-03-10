@@ -1,9 +1,3 @@
-//! # Errors
-//!
-//! Custom errors for the whole library.
-//! Utility types related to errors (Result).
-//! Convert errors from dependencies.
-
 use thiserror::Error;
 use utils::error::UtilsError;
 #[derive(Error, Debug)]

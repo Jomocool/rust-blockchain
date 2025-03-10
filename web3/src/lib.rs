@@ -22,14 +22,12 @@ impl Web3 {
         Ok(Self { client })
     }
 
-    /// Create a new HTTP JSON-RPC client with given url.
     fn get_client(url: &str) -> Result<HttpClient> {
         HttpClientBuilder::default()
             .build(url)
             .map_err(|e| Web3Error::ClientError(e.to_string()))
     }
 
-    /// Send a RPC call with the given method and parameters.
     pub async fn send_rpc<Params>(&self, method: &str, params: Params) -> Result<Value>
     where
         Params: ToRpcParams + Send + std::fmt::Debug,

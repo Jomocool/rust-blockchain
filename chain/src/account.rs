@@ -35,8 +35,6 @@ impl AccountStorage {
         self.upsert(key, data)
     }
 
-    /// Add an account with default account data.
-    /// Skip if the account already exists.
     pub(crate) fn add_empty_account(&mut self, key: &Account) -> Result<bool> {
         let should_add = self.get_account(key).is_err();
         if should_add {
@@ -89,12 +87,10 @@ impl AccountStorage {
     pub(crate) fn update_nonce(&mut self, key: &Account, nonce: U256) -> Result<U256> {
         let mut account_data = self.get_account(key)?;
 
-        // the passed in nonce is lower than the current nonce + 1
         if nonce < account_data.nonce + 1 {
             return Err(ChainError::NonceTooLow(nonce.to_string(), key.to_string()));
         }
 
-        // the passed in nonce is higher than the current nonce + 1
         if nonce > account_data.nonce + 1 {
             return Err(ChainError::NonceTooHigh(nonce.to_string(), key.to_string()));
         }
