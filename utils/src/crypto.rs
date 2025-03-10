@@ -9,13 +9,26 @@ use sha3::{Digest, Keccak256};
 
 use crate::error::{Result, UtilsError};
 
+// 使用lazy_static宏定义一个全局静态变量CONTEXT
+// CONTEXT是一个Secp256k1的实例，使用All配置，这意味着启用所有的验证功能
+// Secp256k1是一种椭圆曲线密码学算法，常用于比特币等加密货币中
+// 全局静态变量便于在程序的任何地方访问Secp256k1的上下文，避免重复创建，提高性能
 lazy_static! {
     pub(crate) static ref CONTEXT: Secp256k1<All> = Secp256k1::new();
 }
 
+/// Signature结构体用于表示一个数字签名。
+/// 它包含三个字段：v, r, 和 s，这些字段共同构成了一个完整的数字签名。
+/// 数字签名在区块链技术中常用于验证交易的完整性和 authenticity。
 pub struct Signature {
+    /// v是一个64位无符号整数，代表签名的版本信息。
+    /// 这个字段帮助在ECDSA签名算法中确定正确的公钥恢复方法。
     pub v: u64,
+    /// r是一个H256类型，代表签名的第一个256位组件。
+    /// 这个字段是ECDSA签名算法的输出之一，用于验证签名。
     pub r: H256,
+    /// s是一个H256类型，代表签名的第二个256位组件。
+    /// 和r一样，s也是ECDSA签名算法的输出，对签名的验证至关重要。
     pub s: H256,
 }
 
@@ -121,13 +134,34 @@ pub fn verify(message: &[u8], signature: &[u8], key: &PublicKey) -> Result<bool>
     Ok(CONTEXT.verify_ecdsa(&message, &signature, key).is_ok())
 }
 
+/// 从给定的消息和签名中恢复出公共钥匙。
+/// 
+/// # 参数
+/// * `message` - 用于生成签名的原始消息。
+/// * `signature` - 消息的紧凑型ECDSA签名。
+/// * `recovery_id` - 用于确定具体签名参数的整数ID。
+/// 
+/// # 返回值
+/// * `Result<PublicKey>` - 恢复成功的公共钥匙，或者在恢复过程中遇到的错误。
+/// 
+/// # 错误处理
+/// * 如果消息哈希失败，返回 `UtilsError::HashError`。
+/// * 如果恢复ID转换失败，返回 `UtilsError::ConversionError`。
+/// * 如果签名解析失败，返回 `UtilsError::VerifyError`。
+/// * 如果公共钥匙恢复失败，返回 `UtilsError::RecoverError`。
 pub fn recover_public_key(message: &[u8], signature: &[u8], recovery_id: i32) -> Result<PublicKey> {
+    // 将消息哈希化，以便用于签名验证。
     let message = hash_message(message)?;
+
+    // 将整数类型的恢复ID转换为所需的类型。
     let recovery_id = RecoveryId::from_i32(recovery_id)
         .map_err(|e| UtilsError::ConversionError(e.to_string()))?;
+
+    // 从紧凑格式的签名和恢复ID中创建可恢复的签名对象。
     let signature = RecoverableSignature::from_compact(signature, recovery_id)
         .map_err(|e| UtilsError::VerifyError(e.to_string()))?;
 
+    // 使用ECDSA算法从消息和签名中恢复公共钥匙。
     CONTEXT
         .recover_ecdsa(&message, &signature)
         .map_err(|e| UtilsError::RecoverError(e.to_string()))
@@ -138,26 +172,47 @@ pub fn recover_address(message: &[u8], signature: &[u8], recovery_id: i32) -> Re
     Ok(public_key_address(&public_key))
 }
 
+/// 使用RLP编码给定的项和可选的签名
+///
+/// RLP编码是一种用于编码任意数据的方案，主要用于以太坊网络
+/// 本函数接受一个可编码项的向量和一个可选的签名，然后将它们编码为一个RLP流
+///
+/// # 参数
+/// - `items`: 一个实现了Encodable trait的类型向量，表示要编码的项
+/// - `signature`: 一个可选的签名引用，如果存在，将与项一起编码
+///
+/// # 返回值
+/// 返回一个RLPStream实例，它包含了编码后的数据
 pub fn rlp_encode<T: Encodable>(items: Vec<T>, signature: Option<&Signature>) -> RlpStream {
+    // 初始化RLP流
     let mut stream = RlpStream::new();
+    // 计算列表大小，如果存在签名，则增加3个元素
     let mut list_size = items.len();
 
+    // 如果有签名，列表大小增加3，因为签名由v、r和s三个部分组成
     if signature.is_some() {
         list_size += 3
     }
 
+    // 开始列表，指定列表大小
     stream.begin_list(list_size);
 
+    // 遍历项并添加到流中
     items.iter().for_each(|item| {
         stream.append(item);
     });
 
+    // 如果签名存在，将其v、r和s部分添加到流中
     if let Some(signature) = signature {
+        // 添加签名的v值
         stream.append(&signature.v);
+        // 添加签名的r值，转换为U256类型
         stream.append(&U256::from_big_endian(signature.r.as_bytes()));
+        // 添加签名的s值，转换为U256类型
         stream.append(&U256::from_big_endian(signature.s.as_bytes()));
     }
 
+    // 返回构建好的RLP流
     stream
 }
 
