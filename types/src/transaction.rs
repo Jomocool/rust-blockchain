@@ -271,6 +271,7 @@ impl Transaction {
 /// - `s`: ECDSA签名的另一部分,是通过私钥 d、随机数 k、交易数据的哈希值 z 以及 r 计算得出的。
 /// - `raw_transaction`: 交易的原始字节数据。
 /// - `transaction_hash`: 交易的哈希值，用于唯一标识该交易。
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct SignedTransaction {
     pub v: u64,
     pub r: H256,

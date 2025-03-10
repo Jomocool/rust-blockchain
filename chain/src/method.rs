@@ -86,21 +86,14 @@ pub(crate) fn eth_get_balance(module: &mut RpcModule<Context>) -> Result<()> {
         // 从请求参数中解析出账户信息
         let key = params.one::<Account>()?;
 
-        // 获取当前区块链的最新区块号
-        let block = blockchain
-            .lock()
-            .await
-            .get_current_block()
-            .map_err(|e| JsonRpseeError::Custom(e.to_string()))?
-            .number;
-
         // 根据账户信息获取账户余额
         let balance = blockchain
             .lock()
             .await
             .accounts
             .get_account(&key)
-            .map_err(|e| Error::Custom(e.to_string()))?;
+            .map_err(|e| Error::Custom(e.to_string()))?
+            .balance;
 
         // 将账户余额转换为十六进制字符串并返回
         Ok(to_hex(balance))

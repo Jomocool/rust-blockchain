@@ -3,7 +3,6 @@ use std::sync::Arc;
 use eth_trie::{EthTrie, Trie};
 use ethereum_types::{H256, U256};
 use types::account::{Account, AccountData};
-use types::block::BlockNumber;
 use types::bytes::Bytes;
 use utils::crypto::to_address;
 

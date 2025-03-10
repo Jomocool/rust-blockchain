@@ -317,10 +317,7 @@ pub(crate) mod tests {
     use utils::crypto::keypair;
 
     use super::*;
-    use crate::{
-        helpers::tests::{setup, ACCOUNT_1, STORAGE},
-        transaction,
-    };
+    use crate::helpers::tests::{setup, ACCOUNT_1, STORAGE};
 
     /// 创建一个新的区块链实例
     pub(crate) fn new_blockchain() -> BlockChain {
@@ -369,6 +366,8 @@ pub(crate) mod tests {
             .await
             .get_transaction_receipt(&transaction_hash)
             .unwrap();
+
+        assert_eq!(receipt.transaction_hash, transaction_hash);
     }
 
     /// 获取账户余额
