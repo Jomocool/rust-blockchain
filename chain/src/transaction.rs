@@ -5,13 +5,17 @@ use ethereum_types::H256;
 use std::collections::VecDeque;
 use types::transaction::{Transaction, TransactionReceipt};
 
+// 定义一个用于存储交易信息的结构体
 #[derive(Debug)]
 pub(crate) struct TransactionStorage {
+    // 存储待处理交易的池
     pub(crate) mempool: VecDeque<Transaction>,
+    // 存储交易哈希与其收据的映射
     pub(crate) receipts: DashMap<H256, TransactionReceipt>,
 }
 
 impl TransactionStorage {
+    // 创建一个新的TransactionStorage实例
     pub(crate) fn new() -> Self {
         Self {
             mempool: VecDeque::new(),
@@ -19,10 +23,12 @@ impl TransactionStorage {
         }
     }
 
+    // 向交易池中发送一个交易
     pub(crate) fn send_transaction(&mut self, transaction: Transaction) {
         self.mempool.push_back(transaction);
     }
 
+    // 根据交易哈希获取交易收据
     pub(crate) fn get_transaction_receipt(&self, hash: &H256) -> Result<TransactionReceipt> {
         let transaction_receipt = self
             .receipts
@@ -35,6 +41,7 @@ impl TransactionStorage {
     }
 }
 
+// 单元测试配置
 #[cfg(test)]
 mod tests {
     use crate::blockchain::tests::{assert_receipt, new_transaction};
@@ -43,6 +50,7 @@ mod tests {
     use super::*;
     use types::account::Account;
 
+    // 测试发送交易功能
     #[tokio::test]
     async fn sends_a_transaction() {
         let (blockchain, _, _) = setup().await;
@@ -54,6 +62,7 @@ mod tests {
         assert_eq!(transaction_storage.mempool.len(), 1);
     }
 
+    // 测试获取交易收据功能
     #[tokio::test]
     async fn gets_a_transaction_receipt() {
         let (blockchain, _, _) = setup().await;

@@ -36,7 +36,6 @@ pub(crate) async fn serve(addr: &str, blockchain: Context) -> Result<ServerHandl
     eth_block_number(&mut module)?;
     eth_get_block_by_number(&mut module)?;
     eth_get_balance(&mut module)?;
-    eth_get_balance_by_block(&mut module)?;
     eth_send_transaction(&mut module)?;
     eth_send_raw_transaction(&mut module)?;
     eth_get_transaction_receipt(&mut module)?;
