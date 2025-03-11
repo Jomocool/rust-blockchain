@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ethereum JSON-RPC Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .method {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .method h2 {
+            margin-top: 0;
+        }
+        .method input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        .method button {
+            padding: 8px 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .method button:hover {
+            background-color: #0056b3;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ethereum JSON-RPC Interface</h1>
+
+        <!-- eth_accounts -->
+        <div class="method">
+            <h2>eth_accounts</h2>
+            <button id="fetchAccounts">Fetch Accounts</button>
+            <pre id="resultAccounts"></pre>
+        </div>
+
+        <!-- eth_getBalance -->
+        <div class="method">
+            <h2>eth_getBalance</h2>
+            <label for="address">Address:</label>
+            <input type="text" id="address" placeholder="Enter Ethereum address">
+            <button id="fetchBalance">Get Balance</button>
+            <pre id="resultBalance"></pre>
+        </div>
+
+        <!-- eth_blockNumber -->
+        <div class="method">
+            <h2>eth_blockNumber</h2>
+            <button id="fetchBlockNumber">Get Block Number</button>
+            <pre id="resultBlockNumber"></pre>
+        </div>
+
+        <!-- eth_getBlockByNumber -->
+        <div class="method">
+            <h2>eth_getBlockByNumber</h2>
+            <label for="blockNumber">Block Number (hex):</label>
+            <input type="text" id="blockNumber" placeholder="Enter block number (e.g., 0x2)">
+            <button id="fetchBlockByNumber">Get Block</button>
+            <pre id="resultBlockByNumber"></pre>
+        </div>
+
+        <!-- eth_sendTransaction -->
+        <div class="method">
+            <h2>eth_sendTransaction</h2>
+            <label for="fromAddress">From Address:</label>
+            <input type="text" id="fromAddress" placeholder="Enter from address">
+            <label for="toAddress">To Address:</label>
+            <input type="text" id="toAddress" placeholder="Enter to address">
+            <label for="gasLimit">Gas Limit (hex):</label>
+            <input type="text" id="gasLimit" placeholder="Enter gas limit (e.g., 0xf4240)">
+            <label for="gasPrice">Gas Price (hex):</label>
+            <input type="text" id="gasPrice" placeholder="Enter gas price (e.g., 0x1)">
+            <label for="value">Value (hex):</label>
+            <input type="text" id="value" placeholder="Enter value (e.g., 0x0)">
+            <label for="data">Data (hex):</label>
+            <input type="text" id="data" placeholder="Enter data (e.g., 0x7b0a2020225f66a7)">
+            <button id="sendTransaction">Send Transaction</button>
+            <pre id="resultSendTransaction"></pre>
+        </div>
+
+        <!-- eth_getTransactionReceipt -->
+        <div class="method">
+            <h2>eth_getTransactionReceipt</h2>
+            <label for="txHash">Transaction Hash:</label>
+            <input type="text" id="txHash" placeholder="Enter transaction hash">
+            <button id="fetchTransactionReceipt">Get Transaction Receipt</button>
+            <pre id="resultTransactionReceipt"></pre>
+        </div>
+
+        <!-- eth_getCode -->
+        <div class="method">
+            <h2>eth_getCode</h2>
+            <label for="contractAddress">Contract Address:</label>
+            <input type="text" id="contractAddress" placeholder="Enter contract address">
+            <button id="fetchCode">Get Code</button>
+            <pre id="resultCode"></pre>
+        </div>
+    </div>
+
+    <script>
+        const url = 'http://127.0.0.1:8545';
+
+        // Helper function to send JSON-RPC requests
+        async function sendRequest(method, params = []) {
+            const data = {
+                jsonrpc: "2.0",
+                id: "id",
+                method,
+                params
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                return await response.json();
+            } catch (error) {
+                console.error('Error:', error);
+                return { error: 'Failed to fetch data' };
+            }
+        }
+
+        // eth_accounts
+        document.getElementById('fetchAccounts').addEventListener('click', async () => {
+            const result = await sendRequest('eth_accounts');
+            document.getElementById('resultAccounts').textContent = JSON.stringify(result, null, 2);
+        });
+
+        // eth_getBalance
+        document.getElementById('fetchBalance').addEventListener('click', async () => {
+            const address = document.getElementById('address').value;
+            if (!address) {
+                alert('Please enter an Ethereum address');
+                return;
+            }
+            const result = await sendRequest('eth_getBalance', [address, 'latest']);
+            document.getElementById('resultBalance').textContent = JSON.stringify(result, null, 2);
+        });
+
+        // eth_blockNumber
+        document.getElementById('fetchBlockNumber').addEventListener('click', async () => {
+            const result = await sendRequest('eth_blockNumber');
+            document.getElementById('resultBlockNumber').textContent = JSON.stringify(result, null, 2);
+        });
+
+        // eth_getBlockByNumber
+        document.getElementById('fetchBlockByNumber').addEventListener('click', async () => {
+            const blockNumber = document.getElementById('blockNumber').value;
+            if (!blockNumber) {
+                alert('Please enter a block number');
+                return;
+            }
+            const result = await sendRequest('eth_getBlockByNumber', [blockNumber, true]); // true to get full transaction objects
+            document.getElementById('resultBlockByNumber').textContent = JSON.stringify(result, null, 2);
+        });
+
+        // eth_sendTransaction
+        document.getElementById('sendTransaction').addEventListener('click', async () => {
+            const fromAddress = document.getElementById('fromAddress').value;
+            const toAddress = document.getElementById('toAddress').value;
+            const gasLimit = document.getElementById('gasLimit').value;
+            const gasPrice = document.getElementById('gasPrice').value;
+            const value = document.getElementById('value').value;
+            const data = document.getElementById('data').value;
+
+            if (!fromAddress || !toAddress || !gasLimit || !gasPrice || !value || !data) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            const params = [{
+                from: fromAddress,
+                to: toAddress,
+                gas: gasLimit,
+                gasPrice: gasPrice,
+                value: value,
+                data: data
+            }];
+
+            const result = await sendRequest('eth_sendTransaction', params);
+            document.getElementById('resultSendTransaction').textContent = JSON.stringify(result, null, 2);
+        });
+
+        // eth_getTransactionReceipt
+        document.getElementById('fetchTransactionReceipt').addEventListener('click', async () => {
+            const txHash = document.getElementById('txHash').value;
+            if (!txHash) {
+                alert('Please enter a transaction hash');
+                return;
+            }
+            const result = await sendRequest('eth_getTransactionReceipt', [txHash]);
+            document.getElementById('resultTransactionReceipt').textContent = JSON.stringify(result, null, 2);
+        });
+
+        // eth_getCode
+        document.getElementById('fetchCode').addEventListener('click', async () => {
+            const contractAddress = document.getElementById('contractAddress').value;
+            if (!contractAddress) {
+                alert('Please enter a contract address');
+                return;
+            }
+            const result = await sendRequest('eth_getCode', [contractAddress, 'latest']);
+            document.getElementById('resultCode').textContent = JSON.stringify(result, null, 2);
+        });
+    </script>
+</body>
+</html>
