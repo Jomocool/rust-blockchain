@@ -1,9 +1,11 @@
+use hyper::Method;
 use jsonrpsee::{
     server::{ServerBuilder, ServerHandle},
     RpcModule,
 };
 use std::{env, net::SocketAddr, sync::Arc, time::Duration};
 use tokio::{sync::Mutex, task, time};
+use tower_http::cors::{Any, CorsLayer};
 use tracing_subscriber::{util::SubscriberInitExt, FmtSubscriber};
 
 use crate::{
@@ -26,8 +28,14 @@ pub(crate) async fn serve(addr: &str, blockchain: Context) -> Result<ServerHandl
     add_keys()?;
 
     let addrs = addr.parse::<SocketAddr>()?;
+    let cors = CorsLayer::new()
+        .allow_methods([Method::POST])
+        .allow_origin(Any)
+        .allow_headers([hyper::header::CONTENT_TYPE]);
+    let middleware = tower::ServiceBuilder::new().layer(cors);
     let server = ServerBuilder::default()
         .set_logger(Logger)
+        .set_middleware(middleware)
         .build(addrs)
         .await?;
     let blockchain_for_transaction_processor = blockchain.clone();

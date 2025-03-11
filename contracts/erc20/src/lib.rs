@@ -4,6 +4,7 @@ wit_bindgen::generate!("erc20");
 
 pub struct Erc20;
 
+#[allow(dead_code)]
 pub struct State {
     name: String,
     symbol: String,
