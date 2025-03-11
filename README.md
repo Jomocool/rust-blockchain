@@ -175,7 +175,7 @@ curl -X POST \
 ```shell
 curl -X POST \
      -H 'Content-Type: application/json' \
-     -d '{"jsonrpc":"2.0","id":"id","method":"eth_getCode","params":["0x1e10dce69fe64c2b9f6990c1f3f5f0418324b145", "latest"]}' \
+     -d '{"jsonrpc":"2.0","id":"id","method":"eth_getCode","params":["0x1e10dce69fe64c2b9f6990c1f3f5f0418324b145"]}' \
      http://127.0.0.1:8545
 ```
 

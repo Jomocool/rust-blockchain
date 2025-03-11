@@ -306,15 +306,6 @@ pub(crate) fn eth_get_code(module: &mut RpcModule<Context>) -> Result<()> {
         // 解析第一个参数：账户地址
         let address = seq.next::<Account>()?;
 
-        // 解析第二个参数：区块标识符（可以是区块哈希或区块编号的字符串表示）
-        let block = seq.next::<String>()?.clone();
-        // 解析并验证区块编号
-        let block_number = blockchain
-            .lock()
-            .await
-            .parse_block_number(&block)
-            .map_err(|e| JsonRpseeError::Custom(e.to_string()))?;
-
         // 获取指定合约账户的代码哈希
         let code_hash = blockchain
             .lock()
@@ -324,7 +315,7 @@ pub(crate) fn eth_get_code(module: &mut RpcModule<Context>) -> Result<()> {
             .map_err(|e| Error::Custom(e.to_string()))?
             .code_hash
             .ok_or_else(|| {
-                JsonRpseeError::Custom(format!("missing code hash for block {:?}", block_number))
+                JsonRpseeError::Custom(format!("missing code hash for account {:?}", address))
             })?;
 
         // 返回代码哈希

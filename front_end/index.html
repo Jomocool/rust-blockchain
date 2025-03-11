@@ -237,7 +237,7 @@
                 alert('Please enter a contract address');
                 return;
             }
-            const result = await sendRequest('eth_getCode', [contractAddress, 'latest']);
+            const result = await sendRequest('eth_getCode', [contractAddress]);
             document.getElementById('resultCode').textContent = JSON.stringify(result, null, 2);
         });
     </script>
