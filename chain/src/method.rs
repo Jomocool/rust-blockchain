@@ -3,11 +3,50 @@ use jsonrpsee::core::Error;
 use jsonrpsee::core::Error as JsonRpseeError;
 use jsonrpsee::RpcModule;
 use types::{
-    account::Account, block::BlockNumber, bytes::Bytes, helpers::to_hex,
+    account::{Account, AccountData},
+    block::BlockNumber,
+    bytes::Bytes,
+    helpers::to_hex,
     transaction::TransactionRequest,
 };
 
 use crate::{error::Result, server::Context};
+
+/// 在RpcModule中添加一个新的异步方法`eth_add_account`。
+///
+/// 此函数通过接收一个`RpcModule<Context>`的可变引用来注册一个新的RPC方法，
+/// 方法名为"eth_add_account"。当该方法被调用时，它会生成一个随机的账户，
+/// 并将其添加到区块链上下文中。
+///
+/// # 参数
+/// * `module`: &mut RpcModule<Context> - RpcModule的可变引用，用于注册RPC方法。
+///
+/// # 返回值
+/// * `Result<()>` - 表示方法注册成功或失败的结果类型。
+pub(crate) fn eth_add_account(module: &mut RpcModule<Context>) -> Result<()> {
+    // 注册一个名为"eth_add_account"的异步方法到RpcModule中。
+    // 该方法不接受任何参数，但需要访问和修改区块链上下文。
+    module.register_async_method("eth_addAccount", |_, blockchain| async move {
+        // 生成一个随机的账户。
+        let key = Account::random();
+
+        // 异步获取区块链上下文的锁，以便添加新账户。
+        blockchain
+            .lock()
+            .await
+            .accounts
+            // 尝试将新生成的账户添加到区块链上下文中。
+            .add_account(&key, &AccountData::new(None))
+            // 如果添加失败，将错误转换为JsonRpseeError::Custom。
+            .map_err(|e| JsonRpseeError::Custom(e.to_string()))?;
+
+        // 返回新生成的账户公钥作为成功响应。
+        Ok(key)
+    })?;
+
+    // 函数执行成功，表示方法已成功注册到RpcModule中。
+    Ok(())
+}
 
 /// 在RpcModule中注册一个异步方法"eth_accounts"
 ///

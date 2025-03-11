@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ethereum JSON-RPC Interface</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -49,7 +48,12 @@
 </head>
 <body>
     <div class="container">
-        <h1>Ethereum JSON-RPC Interface</h1>
+        <!-- eth_addAccount -->
+        <div class="method">
+            <h2>eth_addAccount</h2>
+            <button id="addAccount">Add Account</button>
+            <pre id="resultAddAccount"></pre>
+        </div>
 
         <!-- eth_accounts -->
         <div class="method">
@@ -147,6 +151,12 @@
                 return { error: 'Failed to fetch data' };
             }
         }
+
+        // eth_addAccount
+        document.getElementById('addAccount').addEventListener('click', async () => {
+            const result = await sendRequest('eth_addAccount');
+            document.getElementById('resultAddAccount').textContent = JSON.stringify(result, null, 2);
+        });
 
         // eth_accounts
         document.getElementById('fetchAccounts').addEventListener('click', async () => {

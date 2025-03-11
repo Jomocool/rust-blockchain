@@ -1,10 +1,4 @@
-# Chain
-
-_NOTE: not for use in production_
-
-This crate is a simplistic ethereum blockchain. The goal is to implement major features to fully integrate with the [web3](../web3) crate.
-
-## Start a Chain Node
+## 启动节点
 
 ```shell
 RUST_LOG=info cargo run
@@ -12,9 +6,28 @@ RUST_LOG=info cargo run
 
 ## API
 
-### Accounts
+### 账户相关接口
 
-#### Get All Accounts
+#### 添加账户
+
+##### Request
+```shell
+curl -X POST \
+     -H 'Content-Type: application/json' \
+     -d '{"jsonrpc":"2.0","id":"id","method":"eth_addAccount","params":[]}' \
+     http://127.0.0.1:8545
+```
+
+##### Response
+```json
+{
+    "jsonrpc":"2.0",
+    "id":"id",
+    "result":"0xf39fd6e51aad88f6f4ce6ab8827279cfffb9226"
+}
+```
+
+#### 获取所有账户
 
 ##### Request
 ```shell
@@ -38,7 +51,7 @@ curl -X POST \
 }
 ```
 
-#### Get Account Balance
+#### 获取账户余额
 
 ```shell
 curl -X POST \
@@ -57,7 +70,7 @@ curl -X POST \
 }
 ```
 
-#### Get Current Block Number
+#### 获取当前区块数量
 
 ```shell
 curl -X POST \
@@ -76,7 +89,7 @@ curl -X POST \
 }
 ```
 
-#### Get Block by Block Number
+#### 通过区块序号获取区块信息
 
 ```shell
 curl -X POST \
@@ -111,7 +124,8 @@ curl -X POST \
 }
 ```
 
-#### Send a Transaction
+#### 发送交易
+##### Request
 
 ```shell
 curl -X POST \
@@ -122,8 +136,6 @@ curl -X POST \
 
 ##### Response
 
-Receive a transaction receipt hash on a successful acceptance of a transaction
-
 ```json
 {
     "jsonrpc":"2.0",
@@ -132,7 +144,7 @@ Receive a transaction receipt hash on a successful acceptance of a transaction
 }
 ```
 
-#### Get a Transaction Receipt
+#### 获取交易信息
 
 ```shell
 curl -X POST \
@@ -142,8 +154,6 @@ curl -X POST \
 ```
 
 ##### Response
-
-Receive a transaction receipt of a process transaction
 
 ```json
 {
@@ -159,7 +169,8 @@ Receive a transaction receipt of a process transaction
 }
 ```
 
-#### Get a Contract's Code
+#### 获取合约代码
+##### Request
 
 ```shell
 curl -X POST \
@@ -169,8 +180,6 @@ curl -X POST \
 ```
 
 ##### Response
-
-The contract's code
 
 ```json
 {

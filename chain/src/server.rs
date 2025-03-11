@@ -33,6 +33,7 @@ pub(crate) async fn serve(addr: &str, blockchain: Context) -> Result<ServerHandl
     let blockchain_for_transaction_processor = blockchain.clone();
     let mut module = RpcModule::new(blockchain);
 
+    eth_add_account(&mut module)?;
     eth_accounts(&mut module)?;
     eth_block_number(&mut module)?;
     eth_get_block_by_number(&mut module)?;
@@ -54,6 +55,7 @@ pub(crate) async fn serve(addr: &str, blockchain: Context) -> Result<ServerHandl
     let transaction_processor = task::spawn(async move {
         let mut interval = time::interval(Duration::from_millis(1000));
 
+        // 循环不断处理交易池中的交易
         loop {
             interval.tick().await;
 

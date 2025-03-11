@@ -23,7 +23,7 @@ use utils::{PublicKey, RecoverableSignature, RecoveryId, SecretKey};
 /// - `hash`: 可选字段，代表交易的哈希值。默认为空，当哈希值不存在时不会被序列化。
 /// - `nonce`: 可选字段，代表交易的nonce值，用于确保交易的唯一性和顺序。
 /// - `value`: 交易中转移的金额值。
-/// - `data`: 可选字段，代表交易的数据部分，通常用于合同调用或创建。
+/// - `data`: 可选字段，代表交易的数据部分，通常用于合约调用或创建。
 /// - `gas`: 交易中使用的gas量。
 /// - `gas_price`: 交易中使用的gas价格。
 pub struct Transaction {
