@@ -8,16 +8,16 @@ use wasmtime::{
 use wit_component::ComponentEncoder;
 
 /// 加载WebAssembly合约
-/// 
+///
 /// 该函数接受一个字节切片作为输入，尝试将这些字节作为WebAssembly模块进行解析和加载。
 /// 它首先配置WebAssembly引擎，然后创建一个存储和链接器，最后实例化WebAssembly模块。
-/// 
+///
 /// # 参数
-/// 
+///
 /// * `bytes`: &[u8] - WebAssembly模块的字节表示。
-/// 
+///
 /// # 返回
-/// 
+///
 /// * `Result<(Store<i32>, Instance)>` - 返回一个结果类型，包含WebAssembly存储和实例。
 fn load_contract(bytes: &[u8]) -> Result<(Store<i32>, Instance)> {
     // 创建并配置WebAssembly配置对象
@@ -96,14 +96,20 @@ pub fn call_function(bytes: &[u8], function: &str, params: &[&str]) -> Result<()
     tracing::info!("{} params {:?}", function, parsed);
 
     // 获取指定名称的函数导出
-    let function = instance
+    let func = instance
         .get_func(&mut store, function)
         .ok_or_else(|| RuntimeError::ExportFunctionError(function.into()))?;
 
     // 调用函数，并处理可能的错误
-    function
+    let r = func
         .call(&mut store, &parsed?, &mut [])
-        .map_err(|e| RuntimeError::CallFunctionError(e.to_string()))
+        .map_err(|e| RuntimeError::CallFunctionError(e.to_string()));
+
+    if r.is_ok() {
+        tracing::info!("{:?} called successfully, params: {:?}", function, params);
+    }
+
+    r
 }
 
 /// 从给定的WASM字节码中提取导出的函数名
