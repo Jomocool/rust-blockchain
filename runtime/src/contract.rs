@@ -1,4 +1,5 @@
 use crate::error::{Result, RuntimeError};
+use tracing::trace;
 use wasmtime::{
     self,
     component::{Component, Instance, Linker, Val},
@@ -59,6 +60,7 @@ fn load_contract(bytes: &[u8]) -> Result<(Store<i32>, Instance)> {
 /// - `Result<Val>`: 如果解析成功，则返回包含解析值的 `Ok`，
 ///   否则返回一个包含错误信息的 `Err`
 fn parse_params(chunk: &[&str]) -> Result<Val> {
+    trace!("Parsing params {:?}", chunk);
     match chunk[0] {
         // 当第一个元素是 "String" 时，将第二个元素解析为 `Val::String` 类型
         "String" => Ok(Val::String(chunk[1].into())),

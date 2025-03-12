@@ -92,7 +92,7 @@ mod tests {
 
     #[tokio::test]
     async fn it_deploys_a_contract() {
-        let response = deploy_contract(true).await;
+        let _ = deploy_contract(true).await;
     }
 
     #[tokio::test]

@@ -57,6 +57,38 @@ impl Transaction {
         nonce: Option<U256>,
         data: Option<Bytes>,
     ) -> Result<Self> {
+        let to = if let Some(to) = to {
+            if to.is_zero() {
+                None
+            } else {
+                Some(to)
+            }
+        } else {
+            None
+        };
+
+        let data = if let Some(data) = data {
+            if data.is_empty() {
+                None
+            } else {
+                let decoded_str = String::from_utf8(data.to_vec())
+                    .map_err(|e| TypeError::EncodingDecodingError(e.to_string()))?;
+                match decoded_str.as_str() {
+                    "Erc20" | "erc20" => Some(Bytes::from(
+                        include_bytes!("./../../target/wasm32-unknown-unknown/release/erc20.wasm")
+                            .to_vec(),
+                    )),
+                    _ => {
+                        let params = decoded_str.trim().split(',').collect::<Vec<&str>>();
+                        let to_encode = (params[0], params[1..].to_vec());
+                        Some(Bytes::from(bincode::serialize(&to_encode)?))
+                    }
+                }
+            }
+        } else {
+            None
+        };
+
         let mut transaction = Self {
             from,
             to,
@@ -95,14 +127,14 @@ impl Transaction {
     }
 
     /// 使用给定的密钥对交易进行签名
-    /// 
+    ///
     /// 该方法首先将交易信息序列化为字节流，然后使用密钥对其进行签名
     /// 签名过程产生一个可恢复的签名，从中我们可以提取出签名的v、r、s值
     /// 最后，将这些签名值连同原始交易数据一起封装成一个签名交易对象，并返回
-    /// 
+    ///
     /// # 参数
     /// * `key` - 用于签名交易的密钥
-    /// 
+    ///
     /// # 返回
     /// 如果签名成功，返回一个`SignedTransaction`对象，包含签名信息和原始交易数据
     /// 如果签名过程中出现错误，返回相应的错误
@@ -117,7 +149,7 @@ impl Transaction {
         let Signature { v, r, s } = recoverable_signature.into();
         // 计算签名的哈希值，作为交易的标识
         let transaction_hash = hash(&signature_bytes).into();
-    
+
         // 创建签名交易对象
         let signed_transaction = SignedTransaction {
             v,
@@ -126,7 +158,7 @@ impl Transaction {
             raw_transaction: encoded.into(),
             transaction_hash,
         };
-    
+
         // 返回签名交易对象
         Ok(signed_transaction)
     }
@@ -142,16 +174,16 @@ impl Transaction {
     pub fn verify(signed_transaction: SignedTransaction, address: Address) -> Result<bool> {
         // 从已签名的交易中提取消息、恢复ID和签名字节
         let (message, recovery_id, signature_bytes) = Self::recover_pieces(signed_transaction)?;
-    
+
         // 根据消息、签名字节和恢复ID恢复公钥
         let key = recover_public_key(&message, &signature_bytes, recovery_id.to_i32())?;
-    
+
         // 验证消息的签名是否与恢复的公钥匹配
         let verified = verify(&message, &signature_bytes, &key)?;
-    
+
         // 检查恢复的公钥地址是否与提供的发送方地址匹配
         let addresses_match = address == public_key_address(&key);
-    
+
         // 返回签名验证和地址匹配的逻辑与结果
         Ok(verified && addresses_match)
     }
@@ -170,7 +202,7 @@ impl Transaction {
         let key = Self::recover_public_key(signed_transaction)?;
         // 使用恢复的公钥获取对应的地址
         let address = public_key_address(&key);
-    
+
         // 返回成功恢复的地址
         Ok(address)
     }
@@ -190,10 +222,10 @@ impl Transaction {
     pub fn recover_public_key(signed_transaction: SignedTransaction) -> Result<PublicKey> {
         // 从已签名的交易中提取出消息、恢复ID和签名字节
         let (message, recovery_id, signature_bytes) = Self::recover_pieces(signed_transaction)?;
-    
+
         // 使用提取的信息来恢复公钥
         let key = recover_public_key(&message, &signature_bytes, recovery_id.to_i32())?;
-    
+
         // 返回恢复的公钥
         Ok(key)
     }
@@ -222,16 +254,16 @@ impl Transaction {
     ) -> Result<(Vec<u8>, RecoveryId, [u8; 64])> {
         // 获取原始消息，这里是签名交易的原始交易信息
         let message = signed_transaction.raw_transaction.to_owned();
-        
+
         // 将签名交易转换为签名对象
         let signature: Signature = signed_transaction.into();
-        
+
         // 尝试将签名转换为可恢复的签名，这可能失败，因此使用try_into并返回可能的错误
         let recoverable_signature: RecoverableSignature = signature.try_into()?;
-        
+
         // 将可恢复的签名序列化为紧凑形式，同时提取恢复ID
         let (recovery_id, signature_bytes) = recoverable_signature.serialize_compact();
-    
+
         // 返回包含消息、恢复ID和签名字节的结果
         Ok((message.to_vec(), recovery_id, signature_bytes))
     }
@@ -307,6 +339,7 @@ pub struct TransactionRequest {
     pub gas: U256,
     pub gas_price: U256,
     pub from: Option<Address>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub to: Option<Address>,
     pub value: Option<U256>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -375,8 +408,8 @@ mod tests {
     use std::{convert::From, str::FromStr};
     use utils::crypto::{keypair, public_key_address};
 
-       /// 创建一个新的交易实例
-    /// 
+    /// 创建一个新的交易实例
+    ///
     /// 该函数初始化了一个从固定地址到另一个固定地址的交易，交易金额为1个以太币
     /// 主要用于测试和示例场景，以确保交易对象的正确创建
     pub(crate) fn new_transaction() -> Transaction {
@@ -386,13 +419,13 @@ mod tests {
         let to = H160::from_str("0x6b78fa07883d5c5b527da9828ac77f5aa5a61d3b").unwrap();
         // 初始化交易金额
         let value = U256::from(1u64);
-    
+
         // 创建并返回交易对象
         Transaction::new(from, Some(to), value, None, None).unwrap()
     }
-    
+
     /// 测试从签名交易中恢复地址的功能
-    /// 
+    ///
     /// 该测试函数验证了从签名交易中恢复出的地址是否与使用公钥计算出的地址一致
     #[test]
     fn it_recovers_an_address_from_a_signed_transaction() {
@@ -404,13 +437,13 @@ mod tests {
         let signed = transaction.sign(secret_key).unwrap();
         // 从签名中恢复地址
         let recovered = Transaction::recover_address(signed).unwrap();
-    
+
         // 验证恢复的地址与公钥计算出的地址是否一致
         assert_eq!(recovered, public_key_address(&public_key));
     }
-    
+
     /// 测试验证签名交易的功能
-    /// 
+    ///
     /// 该测试函数验证了一个签名交易是否能被正确验证
     #[test]
     fn it_verifies_a_signed_transaction() {
@@ -423,13 +456,13 @@ mod tests {
         let signed = transaction.sign(secret_key).unwrap();
         // 验证签名
         let verifies = Transaction::verify(signed, transaction.from).unwrap();
-    
+
         // 断言验证结果为真
         assert!(verifies);
     }
-    
+
     /// 测试计算交易树的根哈希值
-    /// 
+    ///
     /// 该测试函数验证了给定一组交易后计算出的Merkle树根哈希值是否符合预期
     #[test]
     fn root_hash() {

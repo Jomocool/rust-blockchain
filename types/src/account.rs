@@ -24,7 +24,7 @@ impl AccountData {
     pub fn new(code_hash: Option<Bytes>) -> Self {
         AccountData {
             nonce: U256::zero(),
-            balance: U256::from(10000),
+            balance: U256::zero(),
             code_hash,
         }
     }

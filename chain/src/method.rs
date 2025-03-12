@@ -5,7 +5,6 @@ use jsonrpsee::RpcModule;
 use types::{
     account::{Account, AccountData},
     block::BlockNumber,
-    bytes::Bytes,
     helpers::to_hex,
     transaction::TransactionRequest,
 };
@@ -227,44 +226,6 @@ pub(crate) fn eth_send_transaction(module: &mut RpcModule<Context>) -> Result<()
         },
     )?;
 
-    Ok(())
-}
-
-/// 在RpcModule中注册一个异步方法，用于发送原始交易到以太坊网络
-///
-/// 该函数通过引用可变的RpcModule<Context>实例来注册方法，允许方法内部修改Context
-/// 注册的方法名为"eth_sendRawTransaction"，它接受一个参数（原始交易数据），并尝试将该交易发送到区块链网络
-///
-/// # 参数
-/// - `module`: &mut RpcModule<Context> - 一个可变引用到RpcModule，用于注册方法和访问Context
-///
-/// # 返回
-/// - `Result<()>` - 表示方法注册成功或失败的结果类型
-pub(crate) fn eth_send_raw_transaction(module: &mut RpcModule<Context>) -> Result<()> {
-    // 注册一个异步方法"eth_sendRawTransaction"
-    // 该方法将接收一个参数，并期望从这个参数中解析出一个原始交易（Bytes类型）
-    // 然后，它将尝试发送这个原始交易到区块链网络，并返回交易哈希值
-    module.register_async_method(
-        "eth_sendRawTransaction",
-        move |params, blockchain| async move {
-            // 从参数中解析出原始交易数据
-            let raw_transaction = params.one::<Bytes>()?;
-
-            // 获取区块链锁，以确保并发安全，然后发送原始交易
-            // 如果发送过程中出现错误，将其转换为Custom错误类型
-            let transaction_hash = blockchain
-                .lock()
-                .await
-                .send_raw_transaction(raw_transaction)
-                .await
-                .map_err(|e| Error::Custom(e.to_string()))?;
-
-            // 返回交易哈希值作为成功的结果
-            Ok(transaction_hash)
-        },
-    )?;
-
-    // 函数执行成功，返回Ok(())
     Ok(())
 }
 

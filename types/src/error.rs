@@ -11,6 +11,9 @@ pub enum TypeError {
     #[error("Invalid transaction: {0}")]
     InvalidTransaction(String),
 
+    #[error("Unsupported contract type: {0}")]
+    UnsupportedContractType(String),
+
     #[error("Missing block hash")]
     MissingBlockHash,
 

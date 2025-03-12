@@ -145,35 +145,4 @@ pub mod tests {
         let response = web3().transaction_receipt(tx_hash).await;
         assert!(response.is_ok());
     }
-
-    #[tokio::test]
-    async fn it_sends_a_raw_transfer_transaction() {
-        let (secret_key, _) = keypair();
-        let transaction = transaction().await;
-        let signed_transaction = web3().sign_transaction(transaction, secret_key).unwrap();
-        let encoded = bincode::serialize(&signed_transaction).unwrap();
-        let response = web3().send_raw(encoded.into()).await;
-        assert!(response.is_ok());
-    }
-
-    #[tokio::test]
-    async fn it_sends_a_raw_contract_call_transaction() {
-        let (secret_key, _) = keypair();
-        let tx_hash = deploy_contract(false).await;
-
-        sleep(Duration::from_millis(1000)).await;
-
-        let receipt = web3().transaction_receipt(tx_hash).await.unwrap();
-        let contract_address = receipt.contract_address.unwrap();
-        let function_call = bincode::serialize(&(
-            "construct",
-            vec!["String", "Rust Coin 1", "String", "RustCoin1"],
-        ))
-        .unwrap();
-        let transaction = function_call_transaction(contract_address, function_call.into()).await;
-        let signed_transaction = web3().sign_transaction(transaction, secret_key).unwrap();
-        let encoded = bincode::serialize(&signed_transaction).unwrap();
-        let response = web3().send_raw(encoded.into()).await;
-        assert!(response.is_ok());
-    }
 }
