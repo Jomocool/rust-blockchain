@@ -2,8 +2,6 @@ use std::collections::HashMap;
 
 wit_bindgen::generate!("erc20");
 
-static mut STATE: Option<State> = None;
-
 pub struct Erc20;
 
 #[allow(dead_code)]
