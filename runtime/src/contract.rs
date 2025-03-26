@@ -112,42 +112,6 @@ pub fn call_function(bytes: &[u8], function: &str, params: &[&str]) -> Result<()
     r
 }
 
-/// 从给定的WASM字节码中提取导出的函数名
-///
-/// # 参数
-/// * `bytes`: &[u8] - WASM模块的字节码表示
-///
-/// # 返回
-/// * `Vec<String>` - 导出的函数名集合
-///
-/// # 功能描述
-/// 该函数使用wasmtime引擎解析WASM字节码，并提取出所有导出的函数名
-/// 首先，它创建一个新的配置对象并启用WASM组件模型
-/// 然后，尝试创建一个引擎实例
-/// 如果引擎创建成功，它将从字节码中创建一个模块实例，并收集所有导出的函数名
-fn _contract_functions(bytes: &[u8]) -> Vec<String> {
-    // 创建一个新的配置对象
-    let mut config = Config::new();
-    // 初始化导出的函数名集合
-    let mut exports = vec![];
-
-    // 启用WASM组件模型
-    Config::wasm_component_model(&mut config, true);
-
-    // 尝试创建一个引擎实例
-    if let Ok(engine) = Engine::new(&config) {
-        // 从字节码创建模块实例并收集导出的函数名
-        exports = wasmtime::Module::from_binary(&engine, bytes)
-            .unwrap()
-            .exports()
-            .map(|export| export.name().to_string())
-            .collect();
-    }
-
-    // 返回导出的函数名集合
-    exports
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -187,22 +151,5 @@ mod tests {
         let params = params_2(&address);
         let parsed = parse_params(&[params[2], params[3]]).unwrap();
         assert_eq!(parsed, Val::U64(10));
-    }
-
-    #[test_log::test]
-    fn it_retrieves_contract_function_names() {
-        let bytes = include_bytes!("./../../target/wasm32-unknown-unknown/release/erc20.wasm");
-        let functions = _contract_functions(bytes);
-        let expected = [
-            "memory",
-            "construct",
-            "mint",
-            "transfer",
-            "cabi_realloc",
-            "__data_end",
-            "__heap_base",
-        ];
-
-        assert_eq!(functions, expected);
     }
 }
