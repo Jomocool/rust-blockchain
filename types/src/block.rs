@@ -2,7 +2,7 @@ use std::ops::Deref;
 
 use ethereum_types::{H256, U64};
 use serde::{Deserialize, Serialize};
-use utils::crypto::hash;
+use utils::crypto::{hash, is_valid_hash};
 
 use crate::{
     error::{Result, TypeError},
@@ -56,6 +56,8 @@ pub struct Block {
     pub transactions_root: H256,
     // 状态根哈希值，用于快速验证区块状态的完整性
     pub state_root: H256,
+    /// number used once，工作量证明
+    pub nonce: u128,
 }
 
 impl Block {
@@ -73,11 +75,18 @@ impl Block {
             transactions,
             transactions_root,
             state_root,
+            nonce: 0,
         };
 
-        let serialized = bincode::serialize(&block)?;
-        let hash: H256 = hash(&serialized).into();
-        block.hash = Some(hash);
+        loop {
+            let serialized = bincode::serialize(&block)?;
+            let hash: H256 = hash(&serialized).into();
+            if is_valid_hash(hash) {
+                block.hash = Some(hash);
+                break;
+            }
+            block.nonce += 1;
+        }
 
         Ok(block)
     }

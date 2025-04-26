@@ -43,15 +43,6 @@ impl AccountStorage {
         self.upsert(key, data)
     }
 
-    pub(crate) fn add_empty_account(&mut self, key: &Account) -> Result<bool> {
-        let should_add = self.get_account(key).is_err();
-        if should_add {
-            self.add_account(key, &AccountData::new(None))?;
-        }
-
-        Ok(should_add)
-    }
-
     /// 添加一个合约账户
     pub fn add_contract_account(&mut self, key: &Account, data: Bytes) -> Result<Account> {
         let nonce = self.get_account(key)?.nonce;

@@ -9,6 +9,8 @@ use sha3::{Digest, Keccak256};
 
 use crate::error::{Result, UtilsError};
 
+static ZERO_COUNT: u16 = 1;
+
 // 使用lazy_static宏定义一个全局静态变量CONTEXT
 // CONTEXT是一个Secp256k1的实例，使用All配置，这意味着启用所有的验证功能
 // Secp256k1是一种椭圆曲线密码学算法，常用于比特币等加密货币中
@@ -135,15 +137,15 @@ pub fn verify(message: &[u8], signature: &[u8], key: &PublicKey) -> Result<bool>
 }
 
 /// 从给定的消息和签名中恢复出公共钥匙。
-/// 
+///
 /// # 参数
 /// * `message` - 用于生成签名的原始消息。
 /// * `signature` - 消息的紧凑型ECDSA签名。
 /// * `recovery_id` - 用于确定具体签名参数的整数ID。
-/// 
+///
 /// # 返回值
 /// * `Result<PublicKey>` - 恢复成功的公共钥匙，或者在恢复过程中遇到的错误。
-/// 
+///
 /// # 错误处理
 /// * 如果消息哈希失败，返回 `UtilsError::HashError`。
 /// * 如果恢复ID转换失败，返回 `UtilsError::ConversionError`。
@@ -214,6 +216,26 @@ pub fn rlp_encode<T: Encodable>(items: Vec<T>, signature: Option<&Signature>) ->
 
     // 返回构建好的RLP流
     stream
+}
+
+/// 检查给定的哈希值是否有效
+///
+/// 有效性是指哈希值的前`ZERO_COUNT`个字节是否全部为0
+/// 这个函数用于验证哈希值是否满足特定的难度条件
+///
+/// # 参数
+///
+/// * `hash` - 一个`H256`类型的哈希值，表示待验证的哈希
+///
+/// # 返回值
+///
+/// 返回一个布尔值，如果哈希值的前`ZERO_COUNT`个字节都为0，则返回`true`，否则返回`false`
+pub fn is_valid_hash(hash: H256) -> bool {
+    // 迭代哈希值的前`ZERO_COUNT`个字节，检查它们是否都为0
+    // `iter`用于遍历哈希值的每个字节
+    // `take`限制遍历的字节数为`ZERO_COUNT`
+    // `all`确保选取的这些字节都满足条件（即都为0）
+    hash.0.iter().take(ZERO_COUNT as usize).all(|&x| x == 0)
 }
 
 #[cfg(test)]

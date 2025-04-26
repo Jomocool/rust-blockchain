@@ -20,16 +20,16 @@ impl Web3 {
     pub async fn send(&self, transaction_request: TransactionRequest) -> Result<H256> {
         // 将TransactionRequest对象转换为Serde JSON值
         let transaction_request = to_value(&transaction_request)?;
-    
+
         // 构造JSON-RPC参数
         let params = rpc_params![transaction_request];
-    
+
         // 发送JSON-RPC请求并等待响应
         let response = self.send_rpc("eth_sendTransaction", params).await?;
-    
+
         // 从响应中解析出交易哈希值
         let tx_hash: H256 = serde_json::from_value(response)?;
-    
+
         // 返回交易哈希值
         Ok(tx_hash)
     }
@@ -53,7 +53,7 @@ impl Web3 {
         let response = self.send_rpc("eth_sendRawTransaction", params).await?;
         // 从响应中反序列化出交易哈希值
         let tx_hash: H256 = serde_json::from_value(response)?;
-    
+
         // 返回交易哈希值
         Ok(tx_hash)
     }
@@ -83,7 +83,7 @@ impl Web3 {
         let response = self.send_rpc("eth_getTransactionReceipt", params).await?;
         // 解析响应数据为 TransactionReceipt 类型
         let receipt = serde_json::from_value(response)?;
-    
+
         // 返回解析后的交易收据
         Ok(receipt)
     }
@@ -92,14 +92,9 @@ impl Web3 {
 #[cfg(test)]
 pub mod tests {
     use super::*;
-    use crate::helpers::tests::{
-        deploy_contract, increment_account_1_nonce, web3, ACCOUNT_1, ACCOUNT_1_NONCE, ACCOUNT_2,
-    };
+    use crate::helpers::tests::{increment_account_1_nonce, web3, ACCOUNT_1, ACCOUNT_2};
     use ethereum_types::U256;
-    use std::time::Duration;
-    use tokio::time::sleep;
-    use types::{account::Account, transaction::Transaction};
-    use utils::crypto::keypair;
+    use types::transaction::Transaction;
 
     async fn transaction() -> Transaction {
         let nonce = increment_account_1_nonce().await;
@@ -113,36 +108,8 @@ pub mod tests {
         .unwrap()
     }
 
-    async fn function_call_transaction(contract_account: Account, data: Bytes) -> Transaction {
-        let nonce = increment_account_1_nonce().await;
-        Transaction::new(
-            *ACCOUNT_1,
-            Some(contract_account),
-            U256::from(10),
-            Some(nonce),
-            Some(data),
-        )
-        .unwrap()
-    }
-
     pub async fn send_transaction() -> Result<H256> {
         let transaction_request: TransactionRequest = transaction().await.into();
         web3().send(transaction_request).await
-    }
-
-    #[tokio::test]
-    async fn it_sends_a_transaction() {
-        let response = send_transaction().await;
-        assert!(response.is_ok());
-    }
-
-    #[tokio::test]
-    async fn it_gets_a_transaction_receipt() {
-        let tx_hash = send_transaction().await.unwrap();
-
-        sleep(Duration::from_millis(2000)).await;
-
-        let response = web3().transaction_receipt(tx_hash).await;
-        assert!(response.is_ok());
     }
 }

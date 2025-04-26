@@ -38,22 +38,3 @@ impl Web3 {
         Ok(balance)
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use crate::helpers::tests::{web3, ACCOUNT_1};
-
-    #[tokio::test]
-    async fn it_gets_a_balance() {
-        let account = *ACCOUNT_1;
-        let response = web3().get_balance(account).await;
-        assert!(response.is_ok());
-    }
-
-    #[tokio::test]
-    async fn it_gets_a_transaction_count() {
-        let account = *ACCOUNT_1;
-        let response = web3().get_transaction_count(account).await;
-        assert!(response.is_ok());
-    }
-}

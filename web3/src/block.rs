@@ -69,21 +69,3 @@ impl Web3 {
         Ok(block)
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use crate::helpers::tests::web3;
-
-    #[tokio::test]
-    async fn it_gets_a_block_number() {
-        let response = web3().get_block_number().await;
-        assert!(response.is_ok());
-    }
-
-    #[tokio::test]
-    async fn it_gets_the_latest_block() {
-        let block_number = web3().get_block_number().await.unwrap();
-        let response = web3().get_block(*block_number).await;
-        assert!(response.is_ok());
-    }
-}

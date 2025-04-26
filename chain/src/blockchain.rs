@@ -191,9 +191,11 @@ impl BlockChain {
             // 记录交易处理信息
             tracing::info!("Processing Transaction {:?}", transaction_hash);
 
-            // 如果交易有目标地址，则添加一个空账户到目标地址
+            // 判断目标账户是否存在，如果不存在返回错误
             if let Some(to) = transaction.to {
-                self.accounts.add_empty_account(&to)?;
+                if self.accounts.get_account(&to).is_err() {
+                    return Err(ChainError::AccountNotFound(to.to_string()));
+                }
             }
 
             // 获取交易类型

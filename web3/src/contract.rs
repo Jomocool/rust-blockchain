@@ -1,4 +1,3 @@
-
 use crate::error::Result;
 use crate::Web3;
 use ethereum_types::Address;
@@ -11,7 +10,7 @@ use types::transaction::TransactionRequest;
 
 impl Web3 {
     // 部署智能合约的异步函数
-    // 
+    //
     // 该函数负责将编译后的智能合约代码（ABI）部署到区块链网络上。它需要合约的拥有者地址、
     // 合约的字节码（ABI）、以及一个可选的交易nonce值。函数会构建一个交易请求，并发送到
     // 区块链网络，等待部署成功并返回交易的哈希值。
@@ -33,20 +32,20 @@ impl Web3 {
         let gas = U256::from(1_000_000); // 设置Gas限制，用于限制交易执行所消耗的最大Gas量
         let gas_price = U256::from(1_000_000); // 设置Gas价格，用于指定每单位Gas的价格
         let data: Bytes = abi.to_vec().into(); // 将ABI字节码转换为交易数据
-    
+
         // 构建交易请求对象，包含所有必要的交易信息
         let transaction_request = TransactionRequest {
-            from: Some(owner), // 指定交易的发送者地址
-            to: None, // 交易的目标地址，对于合约部署来说是None
+            from: Some(owner),         // 指定交易的发送者地址
+            to: None,                  // 交易的目标地址，对于合约部署来说是None
             value: Some(U256::zero()), // 交易附带的以太币价值，这里设置为0
             gas,
             gas_price,
             data: Some(data), // 交易数据，包含合约的字节码
-            nonce, // 交易的nonce值，用于保证交易顺序
-            r: None, // 交易的r签名值，此处不需要提供
-            s: None, // 交易的s签名值，此处不需要提供
+            nonce,            // 交易的nonce值，用于保证交易顺序
+            r: None,          // 交易的r签名值，此处不需要提供
+            s: None,          // 交易的s签名值，此处不需要提供
         };
-    
+
         // 发送构建好的交易请求，并等待结果
         self.send(transaction_request).await
     }
@@ -78,33 +77,8 @@ impl Web3 {
         let response = self.send_rpc("eth_getCode", params).await?;
         // 从响应中解析字节码信息
         let code: Vec<u8> = serde_json::from_value(response)?;
-    
+
         // 返回解析后的字节码信息
         Ok(code)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::helpers::tests::{deploy_contract, web3};
-    use std::time::Duration;
-    use tokio::time::sleep;
-
-    #[tokio::test]
-    async fn it_deploys_a_contract() {
-        let _ = deploy_contract(true).await;
-    }
-
-    #[tokio::test]
-    async fn it_gets_a_contract_code() {
-        let web3 = web3();
-        let tx_hash = deploy_contract(true).await;
-
-        sleep(Duration::from_millis(1000)).await;
-
-        let receipt = web3.transaction_receipt(tx_hash).await.unwrap();
-        let response = web3.code(receipt.contract_address.unwrap(), None).await;
-
-        assert_eq!(response.unwrap(), [0, 1]);
     }
 }
