@@ -64,6 +64,12 @@ pub enum ChainError {
     #[error("Could not destroy the database: {0}")]
     StorageDestroyError(String),
 
+    #[error("Could not remove the key: {0}")]
+    StorageRemoveError(String),
+
+    #[error("Could not flush the database: {0}")]
+    StorageFlushError(String),
+
     #[error("Could not find {0} in storage")]
     StorageNotFound(String),
 

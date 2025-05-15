@@ -37,13 +37,15 @@ impl EthDB for Storage {
         Ok(())
     }
 
-    /// 从数据库中移除指定的键值对，此处未实现具体逻辑
-    fn remove(&self, _key: &[u8]) -> Result<()> {
+    /// 从数据库中移除指定的键值对
+    fn remove(&self, key: &[u8]) -> Result<()> {
+        self.db.delete(key).map_err(|_|ChainError::StorageRemoveError(Storage::key_string(key)))?;
         Ok(())
     }
 
-    /// 刷新数据库，此处未实现具体逻辑
+    /// 刷新数据库
     fn flush(&self) -> Result<()> {
+        self.db.flush().map_err(|_|ChainError::StorageFlushError(Storage::key_string(key)))?;
         Ok(())
     }
 }
