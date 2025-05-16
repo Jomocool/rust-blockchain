@@ -3,9 +3,11 @@ use std::sync::Arc;
 
 use crate::account::AccountStorage;
 use crate::error::{ChainError, Result};
+use crate::helpers::tests::STORAGE;
 use crate::storage::Storage;
 use crate::transaction::TransactionStorage;
 use crate::world_state::WorldState;
+use eth_trie::DB;
 use ethereum_types::{H256, U64};
 use tokio::sync::Mutex;
 use types::account::Account;
@@ -63,6 +65,8 @@ impl BlockChain {
         let parent_hash = current_block.block_hash()?;
         let block = Block::new(number, parent_hash, transactions, state_trie)?;
 
+        // 持久化存储到数据库中
+        STORAGE.insert(block.hash.as_slice(), block.into());
         self.blocks.push(block);
 
         self.get_block_by_number(number)
